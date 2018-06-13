@@ -1,6 +1,3 @@
-# samjbaker
-Hello, well come to the Sam J Baker's reposistory. 
-
-Here are some the kept note for my class and training.  A few short cuts and learned triks.
-
-If you like what you see, leave me a note.
+This is the class noted from ROCK NSM.
+Includs the sensor install notes and download configuration files.
+From June 4 - 13, 2018

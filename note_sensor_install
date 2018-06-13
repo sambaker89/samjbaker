@@ -1,0 +1,312 @@
+# Sensor Install
+
+Basic guide to install Sensor.
+1. choose f11 to select uefi boot
+2. set date time to UTC 24 hours
+3. minimal install.
+
+Partition Information
+1. Create OS disk (use smallest drive)
+   label the smaller disk as OS
+   label the larger disk as DATA 
+2. partition LVM (x2 volume, disks)
+
+Disk Partton Requirements
+/data   --- use all of disk
+/boot   --- 2 GB
+/oot/efi   200 MB
+/       --- 10 GB
+/home   --- 18 GB
+
+OS volume
+1. / -> os volume -- 10G
+2. /boot -> os volume --2G
+3. /boot/efi -> os volume -- 200M
+4. no swap space
+5. format XFS  \
+
+Data Volume
+1. Create /data disks  500G
+2. /data -> data volume
+
+note:
+set the parition
+select the size to be 1
+change/edit the disk size later
+
+Hostname and Network configuration
+   select the port ens0s31f6 (port close the outside edge)
+1. set hostname: sg6-team.local.lan
+2. ethernet management port - select on
+3. set ip 172.16.60.100/24
+4. set the DNS to 192.168.2.1
+5. autoconnect
+6. ignore IPv6
+
+
+Configuring accounts
+1. create user account admin and make user an administrator
+2. set password for admin account
+3. DO NOT set a root accout nor password.  Sensor does not need a root user!
+
+ALWAYS SECURE YOUR SENSOR HOST!!!!
+
+Disabling the Bell sound
+1. Disable bell sound -
+2. sudo vi /etc/inputrc -- uncomment "Set bell style none"
+3. after setting bell style by running: sudo  bind -f /etc/inputrc
+
+username: admin
+pass: perched
+
+### setup and  basic config the host
+#
+#################################################################
+### Disable ipv6
+sudo vi /etc/sysctl.conf
+
+net.ipv6.conf.all.disable_ipv6 = 1
+net.ipv6.conf.default.disable_ipv6 = 1
+net.ipv6.conf.lo.disable_ipv6 = 1
+
+### edit hosts file and disable the IPV6
+sudo vim /etc/hosts
+delete  ::1
+
+### elevate to the root
+sudo -s
+
+# apply the changes 
+sysctl -p
+systemctl restart network
+
+#### enable the filrwall and ports
+# 9092 = bro, kafka and zookeepr
+# 8083 = stenographer
+# 5800 = fsf
+# 2181 = zookeeper
+# 9200 = elasticsearch, data input
+# 9400 = elasticsearch master to worker ndoe communication
+# 5044 = logstassh listerner
+# 5601 = kibana web interface
+#
+firewall-cmd --add-port=9092/tcp --permanent
+firewall-cmd --add-port=8083/tcp --permanent
+firewall-cmd --add-port=5800/tcp --permanent
+firewall-cmd --add-port=2181/tcp --permanent
+firewall-cmd --add-port=2183/tcp --permanent
+firewall-cmd --add-port=9200/tcp --permanent
+firewall-cmd --add-port=9400/tcp --permanent
+firewall-cmd --add-port=5044/tcp --permanent
+firewall-cmd --add-port=5601/tcp --permanent
+firewall-cmd --reload
+
+### Repo and yum update
+# confirm that the dns can resolve "repo"
+#  $ ping repo
+# edit the DNS host entries accordingly if necessary
+
+cd /etc/yum.repos.d/
+rm *
+yes
+
+### copy in the the perched.repo in this file
+scp user@ipaddress:/path/to/perched.repo /etc/yum.repo.d/local.repo
+
+### install all of the pckages
+# stenographer
+# suricata
+# fsf
+# bro
+# kafka
+# zookeeper
+# filebeat
+### 
+yum -y udate
+yum install stenographer suricata fsf zookeeper filebeat
+yum install bro broctl bro-plugin-af_packet bro-plugin-kafka
+#
+### create these folders in the volumen /data
+sudo mkdir -p /data/stenographer/{packet,index}
+sudo mkdir -p /data/bro/{logs,spools}
+sudo mkdir -p /data/kafka/logs
+sudo mkdir -p /data/suricata/logs
+sudo mkdir -p /data/fsf/{logs,archive}
+
+### chang the ownerhsip of each fo the folders
+sudo chown -R stenographer:stenographer /data/stenographer
+sudo chown -R bro:bro /data/bro
+sudo chown -R kafka:kafka /data/kafka
+sudo chown -R suricata:suricata /data/suricata
+sudo chown -R fsf:fsf /data/fsf
+
+######################################################################
+# installation of sensor is completed
+# next configure each of the modules
+# ####################################################################
+#  stenographer
+#  suricata
+#  bro
+#  fsf
+#  kafka
+#  zookeeper
+#  filebeat
+#  ###################################################################
+
+### stenographer configure
+# copy the configuration file stenographer-config to dir /etc/stengrapher/config
+#
+# ensure port: 8083 is setup and open
+#
+scp user@host.ip.address:/path/to/stenographer-config /etc/stenographer/config
+
+### stenographer key creation
+cd /etc/stenographer
+sudo stenokeys.sh stenographer stenographer
+
+### enable and start the stenographer
+sudo systemctl enable stenographer
+sudo systemctl start stenographer
+
+
+### Suricata installation and configuration 
+
+### copy the suricata config file syricata.yaml from the folder to 
+# directory /etc/suricata
+scp user@host.ip.address:/parth/to/suricata.yaml /etc/suricata/syricata.yaml
+
+### enable and start the suricata
+systemctl enable suricata
+systemctl start suricata           
+
+### note for editing the suricata.yaml
+## no space between the ip
+## Define home_net: [192.168.60.1/24,10.0.60.0/16,172.16.60.0/16]     <-  Line 15 only includes team6 local networks.
+
+# move the sysconfig cofnig for suricate
+scp user@host.ip.address:/path/to/suricata /etc/sysconfig/suricata
+
+### enable and start the suricate
+systemctl start suricata
+   
+### get the emerging threats
+#
+# https://rules.emergingthreats.net/open/suricata/rules/
+#   
+# for class purposes: -L = following the linke, -O = download in the user home
+curl -L -O perched-repo/add-rules.sh 
+curl -L -O perched-repo/emerging.rules.tar.gz
+   
+cd /etc/suricata/rules
+
+mv ~/emerging.rules.tar.gz etc/suricate/rules 
+
+### unzip the rule files into the folder   
+tar -xzf emerging.rules.tar.gz
+chown -R suricata:suricata /etc/suricata/rules/
+
+### run the add rule script
+cp suricata.yaml suricata.yaml.orig
+./add-rules.sh
+#
+### restart the suricata
+systemctl restart suricata
+
+### Logrotate for Suricata
+# copy the logroate config to the folder /etc/logrotate.d
+#
+scp user@host.ip.address:/path/to/suricata.conf /etc/logrotate.d/suricata.conf
+
+### Suicata configure is completed ####
+###################################################
+#
+
+###   bro configuraiton ##########################
+#
+#================================================== 
+#   yum install bro broctl bro-plugin-af_packet bro-plugin-kafka
+#   
+#   cat /proc/cpuinfo | egrep -e 'processor|physical id|core id' | xargs -l3
+# 
+# copy the broctl.cfg file into folder /etc/broctl.cfg
+#
+scp user@host.ip.address:/path/to/broctl.cfg /etc/bro/broctl.cfg
+   
+scp user@host.ip.address:/path/to/node.cfg /etc/bro/node.cfg
+	
+cd /usr/share/bro/site
+sudo mkdir scripts
+cd scripts
+    
+## copy the kafka.bro, afpacket.bro and extensions.bro to the script folder
+## copy the local.bro in the site folder
+#
+scp user@host.ip.address:/path/to/kafka.bro /usr/share/bro/site/scripts/kafka.bro
+     
+scp user@host.ip.address:/path/to/afpacket.bro /usr/share/bro/site/scripts/afpacket.bro
+
+scp user@host.ip.address:/path/to/local.bro /usr/share/bro/site/local.bro
+
+scp user@host.ip.address:/path/to/extensions.bro /usr/share/bro/site/scripts/extensions.bro
+### start up the bro     
+sudo broctl stop
+sudo broctl cleanup all
+sudo broctl deploy
+#     check for bro.raw 
+     
+###   afpacket.bro
+#  redef AF_Packet::fanout_id == strcmp(getenv("fanout_id:),"") == 0 ? 0 " to_count(getenv("fanout_id"));
+     
+### Open port 9092 in firwall for Bro
+### end of the bro configuration ###################################     
+    
+### FSF File Scanning Framework configuration ######################
+
+# cd /opt/fsf/fsf-client/conf
+scp user@host.ip.address:/path/to/fsf-client-config.py /opt/fsf/fsf-client/conf/config.py
+     
+# cd /opt/fsf/fsf-server/conf 
+scp user@host.ip.address:/path/to/fsf-server-config.py /opt/fsf/fsf-serveri/conf/config.py
+	
+### end of fsf configuraiton ####
+#
+# star the zookeeper configuraiton
+#
+#
+
+scp user@host.ip.address:/path/to/zoopkeeper.properties /opt/kafka/config/zookeeper.properties
+
+scp user@host.ip.address:/path/to/server.properties /opt/kafka/config/serverproperties
+     
+scp user@host.ip.address:/path/to/zoopkeeper.properties /etc/zookeepr/zoo.cfg
+     
+scp user@host.ip.address:/path/to/server.properties /etc/kafka/server.properties
+
+mkdir -p /var/zookeeper
+sudo chown -R zookeeper:zookeeper /var/zookeeper/
+## match the broker.id field in the .properties
+cd /var/zookeeper
+echo "6"> myid
+     
+systemctl start kafka
+systemctl status kafka
+systemctl restart kafka
+
+## to test the install     
+#    yum install nc
+#     echo stat | nc 172.16.1.100 2181
+#
+### end of the kafka configuration ###################################     
+
+#### configure  filebeat ############################################
+# copy down the filebeat configuraiton file
+#
+sco user@host.ip.address:/path/to/filebeat.yml /etc/filebeat/filebeat.yml
+     
+# update and enable the filebeat
+systemctl enable filebeat
+systemctl start filebeat
+systemctl status filebeat
+     
+### end of filebeat configuraiton ##################################
+

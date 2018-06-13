@@ -350,3 +350,17 @@ sudo yum install kibana
 
 scp user@host.ip.address:/path/to/kibana.yml /etc/kibana/kibana.yml
 
+### end of the kiban configuraion ##########################################################
+#
+#### start the logstash
+#
+sudo yum install logstash
+
+scp user@host.ip.address:/path/to/logstash.yml /etc/logstash/logstash.yml
+
+# copy all x9 logstash filer files into /etc/logstsh/conf.d
+#
+
+scp user@host.ip.address:/path/to/logstash-config/* /etc/logstash/conf.d/
+
+### end of logstash configurairon ####################################################

@@ -285,6 +285,7 @@ scp user@host.ip.address:/path/to/server.properties /etc/kafka/server.properties
 mkdir -p /var/zookeeper
 sudo chown -R zookeeper:zookeeper /var/zookeeper/
 ## match the broker.id field in the .properties
+# this step is need for cluster
 cd /var/zookeeper
 echo "6"> myid
      
@@ -309,4 +310,43 @@ systemctl start filebeat
 systemctl status filebeat
      
 ### end of filebeat configuraiton ##################################
+
+### begining to install the ELK stack ################################
+#
+#===================================================================
+# install the elasticsearch
+#
+sudo yum install elasticsearch
+
+# copy down the configuration file
+scp user@host.ip.address:/path/to/elasticsearch.yml /etc/elasticsearch/elasticsearch.yml
+scp user@host.ip.address:/path/to/jvm.options /etc/elasticsearch/jvm.options
+scp user@host.ip.address:/path/to/override.conf /usr/lib/systemd/system/elasticseaarch.service.d/override.conf
+
+### Note: make sure to bootstrap.memory_lock: true is set for vm
+# edit the configure file in /usr/lib/systemd/elasticsearch.service/override.conf
+# [Service]
+# LimitMEMLOCK=infinity
+#
+# add the data directory
+sudo mkdir -p /data/elasticsearch/data
+sudo chown -R /data/elasticsearch
+
+# ensure the TCP port 9200 is open
+# filewall-cmd --add-port 9200/tcp --permanent
+#
+# enable and restart the elasticsearch
+
+sudo systemctl enable elasticsearch
+sudo systemctl start elasticsearch
+
+### end of the elasticsearch configuration ################################################
+#
+
+### start the kibana
+#
+
+sudo yum install kibana
+
+scp user@host.ip.address:/path/to/kibana.yml /etc/kibana/kibana.yml
 

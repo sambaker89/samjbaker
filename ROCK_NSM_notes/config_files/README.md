@@ -14,3 +14,7 @@
 * /etc/zookeeper/zoo.cfg
 * /etc/kafka/server.properties
 * /etc/filebeat/filebeat.yml
+* /etc/elasticsearch/elasticsearch.yml
+* /etc/elasticsearch/jvm.options
+* /etc/logstash/logstash.yml
+* /usr/lib/systemd/system/elasticsearch.service/override.conf

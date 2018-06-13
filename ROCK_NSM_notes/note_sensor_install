@@ -128,7 +128,7 @@ yum install bro broctl bro-plugin-af_packet bro-plugin-kafka
 #
 ### create these folders in the volumen /data
 sudo mkdir -p /data/stenographer/{packet,index}
-sudo mkdir -p /data/bro/{logs,spools}
+sudo mkdir -p /data/bro/logs
 sudo mkdir -p /data/kafka/logs
 sudo mkdir -p /data/suricata/logs
 sudo mkdir -p /data/fsf/{logs,archive}

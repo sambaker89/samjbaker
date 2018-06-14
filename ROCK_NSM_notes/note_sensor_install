@@ -127,7 +127,7 @@ yum install stenographer suricata fsf zookeeper filebeat
 yum install bro broctl bro-plugin-af_packet bro-plugin-kafka
 #
 ### create these folders in the volumen /data
-sudo mkdir -p /data/stenographer/{packet,index}
+sudo mkdir -p /data/stenographer/{packets,index}
 sudo mkdir -p /data/bro/logs
 sudo mkdir -p /data/kafka/logs
 sudo mkdir -p /data/suricata/logs

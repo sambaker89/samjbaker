@@ -14,7 +14,7 @@ Partition Information
 Disk Partton Requirements
 /data   --- use all of disk
 /boot   --- 2 GB
-/oot/efi   200 MB
+/boot/efi   200 MB
 /       --- 10 GB
 /home   --- 18 GB
 

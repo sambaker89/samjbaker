@@ -1,0 +1,37 @@
+This is a method to describe how to share files between vm host and guest.
+
+1. create a raw image file on the KVM manager
+
+2. on the host, use the fdisk to format the raw image as disk
+
+3. mount the image to the loop
+
+$ file vm-disk1-image-20g.img 
+vm-disk1-image-20g.img: DOS/MBR boot sector; partition 1 : ID=0x86, start-CHS (0x0,32,33), end-CHS (0x232,212,34), startsector 2048, 41940992 sectors
+
+Note:  notice the starting sector.  
+
+$ fdisk -l vm-disk1-image-20g.img 
+Disk vm-disk1-image-20g.img: 20 GiB, 21474836480 bytes, 41943040 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disklabel type: dos
+Disk identifier: 0x9335bf47
+
+Device                  Boot Start      End  Sectors Size Id Type
+vm-disk1-image-20g.img1       2048 41943039 41940992  20G 86 NTFS volume set
+
+Note: The offset = 2048x512 = 1,048,576
+
+4. use the losetup command to mount up the raw disk image
+   
+   losetup --offset 1048576 /dev/loopxx vm-disk-image
+
+5. format the disk image
+  
+   mkfs.nfts -f /dev/loopxxx
+
+6. now mount the image as disk
+
+   mount /dev/loopxx /mnt/usb

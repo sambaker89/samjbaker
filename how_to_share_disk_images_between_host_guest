@@ -35,3 +35,9 @@ Note: The offset = 2048x512 = 1,048,576
 6. now mount the image as disk
 
    mount /dev/loopxx /mnt/usb
+
+7. now, add the image file as a disk to the guest 
+
+8. open the gust vm and mount the new disk as normal.  
+
+9. the content are been shared as soon as you remount the same disk image on the host.

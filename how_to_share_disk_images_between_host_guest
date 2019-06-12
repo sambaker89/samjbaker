@@ -6,12 +6,12 @@ This is a method to describe how to share files between vm host and guest.
 
 3. mount the image to the loop
 
-$ file vm-disk1-image-20g.img 
+$ file vm-disk1-image-20g.img
 vm-disk1-image-20g.img: DOS/MBR boot sector; partition 1 : ID=0x86, start-CHS (0x0,32,33), end-CHS (0x232,212,34), startsector 2048, 41940992 sectors
 
-Note:  notice the starting sector.  
+Note:  notice the starting sector.
 
-$ fdisk -l vm-disk1-image-20g.img 
+$ fdisk -l vm-disk1-image-20g.img
 Disk vm-disk1-image-20g.img: 20 GiB, 21474836480 bytes, 41943040 sectors
 Units: sectors of 1 * 512 = 512 bytes
 Sector size (logical/physical): 512 bytes / 512 bytes
@@ -25,19 +25,22 @@ vm-disk1-image-20g.img1       2048 41943039 41940992  20G 86 NTFS volume set
 Note: The offset = 2048x512 = 1,048,576
 
 4. use the losetup command to mount up the raw disk image
-   
+
    losetup --offset 1048576 /dev/loopxx vm-disk-image
 
 5. format the disk image
-  
+
    mkfs.nfts -f /dev/loopxxx
 
 6. now mount the image as disk
 
    mount /dev/loopxx /mnt/usb
 
-7. now, add the image file as a disk to the guest 
+7. now, add the image file as a disk to the guest
 
-8. open the gust vm and mount the new disk as normal.  
+8. open the gust vm and mount the new disk as normal.
 
 9. the content are been shared as soon as you remount the same disk image on the host.
+note: mount the image on the host as read only
+
+  mount -o ro /dev/loopxx /mnt/usb

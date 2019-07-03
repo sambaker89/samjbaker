@@ -44,3 +44,14 @@ Note: The offset = 2048x512 = 1,048,576
 note: mount the image on the host as read only
 
   mount -o ro /dev/loopxx /mnt/usb
+
+10. to unmount the disk
+  umount /mnt/ust
+  
+11. clean up the loop devices
+  losetup -d /dev/loopxx
+  
+  to check if the look device is clean
+  losetup -a
+  
+  you shouldn't see the mount loop image.

@@ -23,3 +23,9 @@ If you like to select a 10 words list:
 for i in {0..9}; do ./select_word.py; done
 
 If you increase the set to more than 10, like {0..99} you will see repeat selection.
+
+You can also use the linx shuf command
+
+shuf -n10 /usr/share/dict/words
+
+will yields 10 random select words from the dictonary list

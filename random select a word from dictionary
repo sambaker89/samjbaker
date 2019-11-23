@@ -1,4 +1,4 @@
-Date: 21 Nov 2019
+# Date: 21 Nov 2019
 
 In each of the Linux of ditro, it contains a default dictonary in the following locaiton
   /usr/shar/dict
@@ -8,11 +8,13 @@ In the file "words", it collectes about 102,305 individual American English word
 
 This note describe how to select randomly a single words from this word list.
 
+```
 #! /usr/bin/env python
 
 import random
 data=open("/usr/share/dict/words").read().split()
 print random.sample(data,1)[0]
+```
 
 This snip of python codes will randomly select a single word from the list.  Each word
 has the same chance been select (simple, equal distro).  In fact, it is all possible that 

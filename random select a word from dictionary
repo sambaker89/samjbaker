@@ -29,3 +29,7 @@ You can also use the linx shuf command
 shuf -n10 /usr/share/dict/words
 
 will yields 10 random select words from the dictonary list
+
+
+here is a link for more methods
+https://www.unix.com/shell-programming-and-scripting/111753-random-word-flat-text-file.html

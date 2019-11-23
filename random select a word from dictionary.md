@@ -20,18 +20,21 @@ This snip of python codes will randomly select a single word from the list.  Eac
 has the same chance been select (simple, equal distro).  In fact, it is all possible that 
 a words may be selected more than once.
 
-If you like to select a 10 words list:
+## If you like to select a 10 words list:
 
+```
 for i in {0..9}; do ./select_word.py; done
+```
 
 If you increase the set to more than 10, like {0..99} you will see repeat selection.
 
-You can also use the linx shuf command
+## You can also use the linx shuf command
 
+```
 shuf -n10 /usr/share/dict/words
+```
 
-will yields 10 random select words from the dictonary list
+* this will yields 10 random select words from the dictonary list
 
 
-here is a link for more methods
-https://www.unix.com/shell-programming-and-scripting/111753-random-word-flat-text-file.html
+[here is a link for more methods](https://www.unix.com/shell-programming-and-scripting/111753-random-word-flat-text-file.html)
